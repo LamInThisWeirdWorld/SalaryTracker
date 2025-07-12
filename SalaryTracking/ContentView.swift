@@ -46,72 +46,113 @@ func getCurrentWeek() -> [WeekDay] {
 
 struct ContentView: View {
     
-    @State private var selectedDate: Date?
+    @State private var selectedDate: Date? = nil
+    @State private var showDetails: Bool = false
     @State private var weekDays = getCurrentWeek()
     @State private var today = Date()
+    @State private var goToEdit: Bool = false
+    
 
     var body: some View {
-        Spacer()
         NavigationStack() {
-            VStack(alignment: .leading) {
-                Text(fullDayString(from: today))
-                    .foregroundColor(.black)
-                    .font(.largeTitle.bold())
-                    .padding(.horizontal)
-                //            Form {
-                HStack(spacing: 8) {
-                    Spacer()
-                    ForEach(weekDays) { day in
-                        VStack {
-                            Text(shortDayString(from: day.date))
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            
-                            Text(dayNumberString(from: day.date))
-                                .font(.title2)
-                                .fontWeight(day.isToday ? .bold : .regular)
-                                .frame(width: 40, height: 40)
-                                .background(day.date == selectedDate ? Color.blue : Color.clear)
-                                .clipShape(Circle())
-                                .foregroundColor(day.isToday ? .red : .primary)
-                                .onTapGesture {
-                                    selectedDate = day.date
-                                    // check the array weekDays to find the index of the day that has the same date as the day i select
-                                    if let index = weekDays.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: day.date)}) {
-                                        weekDays[index].hasShift.toggle()
+            ZStack(alignment: .top) {
+                Color(hex: "F8F7F5")
+                    .ignoresSafeArea()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(fullDayString(from: today))
+                        .foregroundColor(Color(hex: "2D2848"))
+                        .font(.largeTitle.bold())
+                        .padding(.horizontal)
+                    //            Form {
+                    HStack(spacing: 8) {
+                        //                    Spacer()
+                        ForEach(weekDays) { day in
+                            VStack {
+                                Text(shortDayString(from: day.date))
+                                    .font(.footnote)
+                                    .foregroundColor(Color(hex: "2D2848"))
+                                
+                                Text(dayNumberString(from: day.date))
+                                    .font(.title2)
+                                    .fontWeight(day.isToday ? .bold : .regular)
+                                    .frame(width: 40, height: 40)
+                                    .background(Color.clear)
+                                //                                .background(day.date == selectedDate ? Color.blue : Color.clear)
+                                    .clipShape(Circle())
+                                    .foregroundColor(day.isToday ? .red : .primary)
+                                    .onTapGesture {
+                                        withAnimation {
+                                            if selectedDate == day.date {
+                                                selectedDate = nil
+                                                showDetails = false
+                                            } else {
+                                                selectedDate = day.date
+                                                showDetails = true
+                                            }
+                                        }
+                                        // check the array weekDays to find the index of the day that has the same date as the day i select
+                                        //                                    if let index = weekDays.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: day.date)}) {
+                                        //                                        weekDays[index].hasShift.toggle()
+                                        //                                    }
                                     }
-                                }
+                            }
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity)
+                            .background(selectedDate == day.date ? Color(hex: "F2D88F") : Color(hex: "EBF0FF").opacity(0.7))
+                            //                        .background(day.hasShift ? Color.yellow.opacity(0.8) : Color.gray.opacity(0.1))
+                            .clipShape(Capsule())
                         }
-                        .padding(.vertical, 15)
-                        .background(day.hasShift ? Color.gray.opacity(0.8) : Color.gray.opacity(0.1))
-                        .clipShape(Capsule())
+                        
+                        //                    Spacer()
                     }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(hex: "A68CEE"))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding(.horizontal)
                     
-                    Spacer()
-                }
-                .padding()
-                .background(Color.yellow.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .padding(.horizontal)
-                
-                Form {
-                    Section(header: Text("Shift Details")) {
-                        Text("")
+                    //                Form {
+                    //                    Section(header: Text("Shift Details")) {
+                    //                        Text("")
+                    //                    }
+                    //                }
+                    
+                    if showDetails, let selected = selectedDate {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Button("+") {
+                                goToEdit = true
+                            }
+                            .font(.title3.bold())
+                            .padding(.horizontal)
+                            .foregroundColor(.white)
+                            .background(Color(hex: "2D2848"))
+                            .clipShape(Capsule())
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            
+                            // viet tiep o day
+                            // them navigationLink, se move to cai space do khi cai button dc an
+                            // trong do se dung de cap nhat shift info
+                            
+                            
+                            Text("Details for \(formattedDate(selected))")
+                                .font(.headline)
+                            Text("Shift Start: —")
+                            Text("Shift End: —")
+                            Text("Total Hours: —")
+                            Text("Salary: —")
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
                 }
+                Spacer()
             }
-            
-            Spacer()
-                
-//                .padding()
-                
-//            }
-            
-            
         }
-        
-//        Spacer()
-//        Spacer()
     }
     
     func shortDayString(from date: Date) -> String {
@@ -131,6 +172,17 @@ struct ContentView: View {
         formatter.dateFormat = "EEEE, d MMMM"
         return formatter.string(from: date)
     }
+    
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+    
+    func adjustDetail() {
+        
+    }
+
 }
 
 #Preview {

@@ -16,6 +16,9 @@ struct WeekDay: Identifiable {
     var isToday: Bool { //Check if the day is today base on the user current calendar setting
         Calendar.current.isDateInToday(date)
     }
+//    var shiftDetails: ShiftDetailView {
+//        
+//    }
 }
 
 func getCurrentWeek() -> [WeekDay] {
@@ -51,6 +54,8 @@ struct ContentView: View {
     @State private var weekDays = getCurrentWeek()
     @State private var today = Date()
     @State private var goToEdit: Bool = false
+    
+    @State private var shiftDetail = ShiftDetailView()
     
 
     var body: some View {
@@ -119,24 +124,24 @@ struct ContentView: View {
                     
                     if showDetails, let selected = selectedDate {
                         VStack(alignment: .leading, spacing: 8) {
-                            Button("+") {
-                                goToEdit = true
+                            HStack {
+                                Text("Shift details for \(formattedDate(selected))")
+                                    .font(.headline)
+                                Spacer()
+                                Button("+") {
+                                    goToEdit = true
+                                }
+                                .font(.title3.bold())
+                                .padding(.horizontal)
+                                .foregroundColor(.white)
+                                .background(Color(hex: "2D2848"))
+                                .clipShape(Capsule())
+                                
+                                // viet tiep o day
+                                // them navigationLink, se move to cai space do khi cai button dc an
+                                // trong do se dung de cap nhat shift info
                             }
-                            .font(.title3.bold())
-                            .padding(.horizontal)
-                            .foregroundColor(.white)
-                            .background(Color(hex: "2D2848"))
-                            .clipShape(Capsule())
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                            
-                            // viet tiep o day
-                            // them navigationLink, se move to cai space do khi cai button dc an
-                            // trong do se dung de cap nhat shift info
-                            
-                            
-                            Text("Details for \(formattedDate(selected))")
-                                .font(.headline)
-                            Text("Shift Start: —")
+                            Text("Shift Start: -")
                             Text("Shift End: —")
                             Text("Total Hours: —")
                             Text("Salary: —")
@@ -148,9 +153,11 @@ struct ContentView: View {
                         .shadow(radius: 5)
                         .padding(.horizontal)
                         .transition(.move(edge: .top).combined(with: .opacity))
+                        .navigationDestination(isPresented: $goToEdit) { ShiftDetailView()
+                        }
+                        Spacer()
                     }
                 }
-                Spacer()
             }
         }
     }

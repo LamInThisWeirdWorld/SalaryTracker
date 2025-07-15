@@ -187,9 +187,7 @@ struct ContentView: View {
                                         get: {
                                             shiftData[selected.startOfTheDay, default: ShiftInfo(startTime: ShiftDetailView.defaultStartTime, endTime: ShiftDetailView.defaultEndTime, payPerHour: 22.2)]
                                         }, set: { newValue in
-                                            if doneEdit {
-                                                shiftData[selected.startOfTheDay] = newValue
-                                            }
+                                            shiftData[selected.startOfTheDay] = newValue
                                             
                                         }
                                     )

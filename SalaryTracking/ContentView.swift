@@ -8,7 +8,7 @@
 import SwiftUI
 
 // 1) create a model for a week
-//WeekDay conforms to the Identifiable protocol. Identifiable requires a unique id property for each item so SwiftUI can efficiently manage and update views.
+// WeekDay conforms to the Identifiable protocol. Identifiable requires a unique id property for each item so SwiftUI can efficiently manage and update views.
 struct WeekDay: Identifiable {
     let id = UUID() //This generates a Universally Unique Identifier, Each `WeekDay` will have a different `id` value.
     let date: Date
@@ -47,6 +47,12 @@ func getCurrentWeek() -> [WeekDay] {
     }
 }
 
+extension Date {
+    var startOfTheDay: Date {
+        Calendar.current.startOfDay(for: self)
+    }
+}
+
 struct ContentView: View {
     
     @State private var selectedDate: Date? = nil
@@ -55,7 +61,16 @@ struct ContentView: View {
     @State private var today = Date()
     @State private var goToEdit: Bool = false
     
-    @State private var shiftDetail = ShiftDetailView()
+    @State private var thisDay: Date? = nil
+    @State private var shiftData: [Date: ShiftInfo] = [:]
+    
+    
+    
+//    @State private var dayData: ShiftInfo? = nil
+
+//    @State private var shiftDetail = ShiftDetailView()
+//    @State private var dayData: ShiftInfo
+//    @State private var dayData: Date? = nil
     
 
     var body: some View {
@@ -73,6 +88,7 @@ struct ContentView: View {
                         //                    Spacer()
                         ForEach(weekDays) { day in
                             VStack {
+//                                dayData = day.date
                                 Text(shortDayString(from: day.date))
                                     .font(.footnote)
                                     .foregroundColor(Color(hex: "2D2848"))
@@ -106,6 +122,8 @@ struct ContentView: View {
                             .background(selectedDate == day.date ? Color(hex: "F2D88F") : Color(hex: "EBF0FF").opacity(0.7))
                             //                        .background(day.hasShift ? Color.yellow.opacity(0.8) : Color.gray.opacity(0.1))
                             .clipShape(Capsule())
+                            
+//                            ShiftDetailView(shiftInfo: $shiftData[day])
                         }
                         
                         //                    Spacer()
@@ -127,8 +145,11 @@ struct ContentView: View {
                             HStack {
                                 Text("Shift details for \(formattedDate(selected))")
                                     .font(.headline)
+//                                shiftData[selected] = {}
+                                
                                 Spacer()
                                 Button("+") {
+//                                    dayData = selectedDate
                                     goToEdit = true
                                 }
                                 .font(.title3.bold())
@@ -137,14 +158,17 @@ struct ContentView: View {
                                 .background(Color(hex: "2D2848"))
                                 .clipShape(Capsule())
                                 
-                                // viet tiep o day
-                                // them navigationLink, se move to cai space do khi cai button dc an
-                                // trong do se dung de cap nhat shift info
+
                             }
-                            Text("Shift Start: -")
-                            Text("Shift End: —")
-                            Text("Total Hours: —")
-                            Text("Salary: —")
+                            if let shift = shiftData[selected.startOfTheDay] {
+                                let totalHours = shift.totalHours
+                                Text("Shift start: \(formattedTime(shift.startTime))")
+                                Text("Shift end: \(formattedTime(shift.endTime))")
+                                Text("Total hours: \(String(format: "%g", shift.totalHours))")
+                                Text("Total salary: \(String(format: "%g", shift.totalSalary))")
+                            } else {
+                                Text("No shift today, yayy!!")
+                            }
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -153,7 +177,25 @@ struct ContentView: View {
                         .shadow(radius: 5)
                         .padding(.horizontal)
                         .transition(.move(edge: .top).combined(with: .opacity))
-                        .navigationDestination(isPresented: $goToEdit) { ShiftDetailView()
+                        .navigationDestination(isPresented: $goToEdit) {
+//                            thisDay = selectedDate
+//                            ShiftDetailView(day: $selectedDate)
+                            if let selected = selectedDate {
+                                ShiftDetailView(
+                                    day: selected,
+                                    shiftInfo: Binding(
+                                        get: {
+                                            shiftData[selected.startOfTheDay, default: ShiftInfo(startTime: ShiftDetailView.defaultStartTime, endTime: ShiftDetailView.defaultEndTime, payPerHour: 22.2)]
+                                        }, set: { newValue in
+                                            if doneEdit {
+                                                shiftData[selected.startOfTheDay] = newValue
+                                            }
+                                            
+                                        }
+                                    )
+                                )
+                            }
+                            
                         }
                         Spacer()
                     }
@@ -183,6 +225,12 @@ struct ContentView: View {
     func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+    
+    func formattedTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
         return formatter.string(from: date)
     }
     

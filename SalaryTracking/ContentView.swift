@@ -60,9 +60,11 @@ struct ContentView: View {
     @State private var weekDays = getCurrentWeek()
     @State private var today = Date()
     @State private var goToEdit: Bool = false
-    
     @State private var thisDay: Date? = nil
+    
     @State private var shiftData: [Date: ShiftInfo] = [:]
+//    @State private var onSave: Bool = false
+    @State private var onSave = false
     
     
     
@@ -98,7 +100,6 @@ struct ContentView: View {
                                     .fontWeight(day.isToday ? .bold : .regular)
                                     .frame(width: 40, height: 40)
                                     .background(Color.clear)
-                                //                                .background(day.date == selectedDate ? Color.blue : Color.clear)
                                     .clipShape(Circle())
                                     .foregroundColor(day.isToday ? .red : .primary)
                                     .onTapGesture {
@@ -134,12 +135,6 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                     .padding(.horizontal)
                     
-                    //                Form {
-                    //                    Section(header: Text("Shift Details")) {
-                    //                        Text("")
-                    //                    }
-                    //                }
-                    
                     if showDetails, let selected = selectedDate {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
@@ -161,7 +156,6 @@ struct ContentView: View {
 
                             }
                             if let shift = shiftData[selected.startOfTheDay] {
-                                let totalHours = shift.totalHours
                                 Text("Shift start: \(formattedTime(shift.startTime))")
                                 Text("Shift end: \(formattedTime(shift.endTime))")
                                 Text("Total hours: \(String(format: "%g", shift.totalHours))")
@@ -183,12 +177,22 @@ struct ContentView: View {
                             if let selected = selectedDate {
                                 ShiftDetailView(
                                     day: selected,
+                                    onSave: $onSave,
                                     shiftInfo: Binding(
                                         get: {
                                             shiftData[selected.startOfTheDay, default: ShiftInfo(startTime: ShiftDetailView.defaultStartTime, endTime: ShiftDetailView.defaultEndTime, payPerHour: 22.2)]
                                         }, set: { newValue in
+//                                            if onSave {
+//                                                shiftData[selected.startOfTheDay] = newValue
+//                                            } else  {}
+//                                            onSave = false
+//                                            let thisDay = shiftData[selected.startOfTheDay]
+//                                            if thisDay.isSave {
+//                                                thisDay = DefaultIndices.shiftInfo
+//                                            } else {
+//                                                shiftData[selected.startOfTheDay] = newValue
+//                                            }
                                             shiftData[selected.startOfTheDay] = newValue
-                                            
                                         }
                                     )
                                 )

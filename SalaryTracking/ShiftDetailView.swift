@@ -35,15 +35,15 @@ struct ShiftDetailView: View {
     }
     
     let day: Date
+//    let onSave: (ShiftInfo) -> Void
+    @Binding var onSave: Bool
     @Binding var shiftInfo: ShiftInfo
-    
-//    @Binding var day: Date?
     
     @State private var shiftStart = defaultStartTime
     @State private var shiftEnd = defaultEndTime
-    @State var doneEdit = false
+
     
-    @State private var change: Date? = nil
+    @State var change: Date? = nil
     
     var body: some View {
         Form {
@@ -54,16 +54,12 @@ struct ShiftDetailView: View {
                 HStack {
                     Text("Shift starts at:")
                     Spacer()
-//                    DatePicker("Please select shift start time", selection: $shiftStart, displayedComponents: .hourAndMinute)
-//                        .labelsHidden()
                     DatePicker("Please select shift start time", selection: $shiftInfo.startTime, displayedComponents: .hourAndMinute)
                         .labelsHidden()
                 }
                 HStack {
                     Text("Shift ends at:")
                     Spacer()
-//                    DatePicker("Please select shift start time", selection: $shiftEnd, displayedComponents: .hourAndMinute)
-//                        .labelsHidden()
                     DatePicker("Please select shift start time", selection: $shiftInfo.endTime, displayedComponents: .hourAndMinute)
                         .labelsHidden()
                 }
@@ -72,7 +68,8 @@ struct ShiftDetailView: View {
         .navigationTitle("Edit shift details")
         .toolbar {
             Button("Save") {
-                doneEdit = true
+                onSave = true
+                shiftInfo = shiftInfo
             }
         }
     }
@@ -83,9 +80,10 @@ struct ShiftDetailView: View {
         return formatter.string(from: date)
     }
     
-    func saveData() {
-        
-    }
+//    func saveData() {
+//        let startTime = Calendar.current.dateComponents([.hour, .minute], from:shiftInfo.startTime)
+//        let endTime = Calendar.current.dateComponents( [.hour, .minute], from: shiftInfo.endTime)
+//    }
     
 //    func initShiftInfo() -> ShiftInfo {
 //        var component = DateComponents()

@@ -41,9 +41,6 @@ struct ShiftDetailView: View {
     @Binding var onSave: Bool
     @Binding var shiftInfo: ShiftInfo
     
-    //    @State private var shiftStart = defaultStartTime
-    //    @State private var shiftEnd = defaultEndTime
-    
     @State private var shiftStart: Date = .now
     @State private var shiftEnd: Date = .now
     

@@ -63,16 +63,7 @@ struct ContentView: View {
     @State private var thisDay: Date? = nil
     
     @State private var shiftData: [Date: ShiftInfo] = [:]
-//    @State private var onSave: Bool = false
     @State private var onSave = false
-    
-    
-    
-//    @State private var dayData: ShiftInfo? = nil
-
-//    @State private var shiftDetail = ShiftDetailView()
-//    @State private var dayData: ShiftInfo
-//    @State private var dayData: Date? = nil
     
 
     var body: some View {
@@ -85,12 +76,10 @@ struct ContentView: View {
                         .foregroundColor(Color(hex: "2D2848"))
                         .font(.largeTitle.bold())
                         .padding(.horizontal)
-                    //            Form {
                     HStack(spacing: 8) {
                         //                    Spacer()
                         ForEach(weekDays) { day in
                             VStack {
-//                                dayData = day.date
                                 Text(shortDayString(from: day.date))
                                     .font(.footnote)
                                     .foregroundColor(Color(hex: "2D2848"))
@@ -112,22 +101,13 @@ struct ContentView: View {
                                                 showDetails = true
                                             }
                                         }
-                                        // check the array weekDays to find the index of the day that has the same date as the day i select
-                                        //                                    if let index = weekDays.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: day.date)}) {
-                                        //                                        weekDays[index].hasShift.toggle()
-                                        //                                    }
                                     }
                             }
                             .padding(.vertical, 10)
                             .frame(maxWidth: .infinity)
                             .background(selectedDate == day.date ? Color(hex: "F2D88F") : Color(hex: "EBF0FF").opacity(0.7))
-                            //                        .background(day.hasShift ? Color.yellow.opacity(0.8) : Color.gray.opacity(0.1))
                             .clipShape(Capsule())
-                            
-//                            ShiftDetailView(shiftInfo: $shiftData[day])
                         }
-                        
-                        //                    Spacer()
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -140,11 +120,9 @@ struct ContentView: View {
                             HStack {
                                 Text("Shift details for \(formattedDate(selected))")
                                     .font(.headline)
-//                                shiftData[selected] = {}
                                 
                                 Spacer()
                                 Button("+") {
-//                                    dayData = selectedDate
                                     goToEdit = true
                                 }
                                 .font(.title3.bold())
@@ -152,8 +130,6 @@ struct ContentView: View {
                                 .foregroundColor(.white)
                                 .background(Color(hex: "2D2848"))
                                 .clipShape(Capsule())
-                                
-
                             }
                             if let shift = shiftData[selected.startOfTheDay] {
                                 Text("Shift start: \(formattedTime(shift.startTime))")
@@ -172,8 +148,6 @@ struct ContentView: View {
                         .padding(.horizontal)
                         .transition(.move(edge: .top).combined(with: .opacity))
                         .navigationDestination(isPresented: $goToEdit) {
-//                            thisDay = selectedDate
-//                            ShiftDetailView(day: $selectedDate)
                             if let selected = selectedDate {
                                 ShiftDetailView(
                                     day: selected,

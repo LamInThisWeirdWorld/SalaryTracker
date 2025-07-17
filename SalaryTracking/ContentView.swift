@@ -180,19 +180,13 @@ struct ContentView: View {
                                     onSave: $onSave,
                                     shiftInfo: Binding(
                                         get: {
-                                            shiftData[selected.startOfTheDay, default: ShiftInfo(startTime: ShiftDetailView.defaultStartTime, endTime: ShiftDetailView.defaultEndTime, payPerHour: 22.2)]
+                                            shiftData[selected.startOfTheDay] ?? ShiftInfo(startTime: ShiftDetailView.defaultStartTime, endTime: ShiftDetailView.defaultEndTime, payPerHour: 22.2)
+                                            
                                         }, set: { newValue in
-//                                            if onSave {
-//                                                shiftData[selected.startOfTheDay] = newValue
-//                                            } else  {}
-//                                            onSave = false
-//                                            let thisDay = shiftData[selected.startOfTheDay]
-//                                            if thisDay.isSave {
-//                                                thisDay = DefaultIndices.shiftInfo
-//                                            } else {
-//                                                shiftData[selected.startOfTheDay] = newValue
-//                                            }
-                                            shiftData[selected.startOfTheDay] = newValue
+                                            if onSave {
+                                                shiftData[selected.startOfTheDay] = newValue
+                                            } else  {}
+                                            onSave = false
                                         }
                                     )
                                 )

@@ -65,6 +65,26 @@ struct ContentView: View {
     @State private var shiftData: [Date: ShiftInfo] = [:]
     @State private var onSave = false
     
+    var weeklyTotalSalary: Double {
+        let totalSalary = shiftData.reduce(into: 0) { total, day in
+            total += day.value.totalSalary
+        }
+        return totalSalary
+    }
+    
+    var weeklyTotalHours: Double {
+        let totalHours = shiftData.reduce(into: 0) { total, day in
+            total += day.value.totalHours
+        }
+        return totalHours
+    }
+    
+    var weeklyTotalPaidHours: Double {
+        let totalPaidHours = shiftData.reduce(into: 0) { total, day in
+            total += day.value.totalPaidHours
+        }
+        return totalPaidHours
+    }
 
     var body: some View {
         NavigationStack() {
@@ -76,8 +96,24 @@ struct ContentView: View {
                         .foregroundColor(Color(hex: "2D2848"))
                         .font(.largeTitle.bold())
                         .padding(.horizontal)
+                    
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Total hours of work: \(String(format: "%g", weeklyTotalHours))")
+                            .foregroundColor(Color(hex: "2D2848"))
+                            .font(.title3.bold())
+                            .padding(.horizontal)
+                        Text("Actual paid hours: \(String(format: "%g", weeklyTotalPaidHours))")
+                            .foregroundColor(Color(hex: "2D2848"))
+                            .font(.title3.bold())
+                            .padding(.horizontal)
+                        Text("Total salary: \(String(format: "%g", weeklyTotalSalary))")
+                            .foregroundColor(Color(hex: "2D2848"))
+                            .font(.title3.bold())
+                            .padding(.horizontal)
+                    }
+
+                    
                     HStack(spacing: 8) {
-                        //                    Spacer()
                         ForEach(weekDays) { day in
                             VStack {
                                 Text(shortDayString(from: day.date))
@@ -134,8 +170,8 @@ struct ContentView: View {
                             if let shift = shiftData[selected.startOfTheDay] {
                                 Text("Shift start: \(formattedTime(shift.startTime))")
                                 Text("Shift end: \(formattedTime(shift.endTime))")
-                                Text("Total hours: \(String(format: "%g", shift.totalHours))")
-                                Text("Total salary: \(String(format: "%g", shift.totalSalary))")
+                                Text("Total hours: \(String(format: "%g", shift.totalHours))\(shift.totalHours > 5 ? " (includes 0.5hr break)" : "")")
+                                Text("Shift earnings: $\(String(format: "%g", shift.totalSalary))")
                             } else {
                                 Text("No shift today, yayy!!")
                             }
@@ -164,6 +200,7 @@ struct ContentView: View {
                                         }
                                     )
                                 )
+                                
                             }
                             
                         }

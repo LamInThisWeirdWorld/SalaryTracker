@@ -13,11 +13,12 @@ struct ShiftInfo: Equatable {
     var totalHours: Double {
         return endTime.timeIntervalSince(startTime) / 3600
     }
+    var totalPaidHours: Double {
+        return totalHours <= 5 ? totalHours : totalHours - 0.5
+    }
     var payPerHour: Double
     var totalSalary: Double {
-        return totalHours <= 5 ?
-        totalHours * payPerHour
-        : (totalHours - 0.5) * payPerHour
+        return totalPaidHours * payPerHour
     }
 }
 

@@ -20,6 +20,11 @@ struct ShiftInfo: Equatable {
     var totalSalary: Double {
         return totalPaidHours * payPerHour
     }
+    
+    mutating func setSalary(_ salary: Double) {
+        self.payPerHour = salary
+    }
+    
 }
 
 struct ShiftDetailView: View {
@@ -44,38 +49,65 @@ struct ShiftDetailView: View {
     
     @State private var shiftStart: Date = .now
     @State private var shiftEnd: Date = .now
+    @State private var showingAlert = false
+    @State private var gotPaid: Double = 22.2
     
     
-    @State var change: Date? = nil
+    let isDelete: () -> Void
     
     var body: some View {
         Form {
-            VStack {
-                Text("Shift for \(formattedDate(day))")
-                HStack {
-                    Text("Shift starts at:")
-                    Spacer()
-                    DatePicker("Please select shift start time", selection: $shiftStart, displayedComponents: .hourAndMinute)
-                        .labelsHidden()
+            Section {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Shift for \(formattedDate(day))")
+                        .font(.headline)
+                    HStack {
+                        Text("Shift starts at:")
+                        Spacer()
+                        DatePicker("Please select shift start time", selection: $shiftStart, displayedComponents: .hourAndMinute)
+                            .labelsHidden()
+                    }
+                    HStack {
+                        Text("Shift ends at:")
+                        Spacer()
+                        DatePicker("Please select shift end time", selection: $shiftEnd, displayedComponents: .hourAndMinute)
+                            .labelsHidden()
+                    }
                 }
-                HStack {
-                    Text("Shift ends at:")
-                    Spacer()
-                    DatePicker("Please select shift end time", selection: $shiftEnd, displayedComponents: .hourAndMinute)
-                        .labelsHidden()
+            }
+            
+            Section("pay per hour") {
+                TextField("Amount", value: $gotPaid, format: .currency(code: Locale.current.currency?.identifier ?? "AUD"))
+                    .keyboardType(.decimalPad)
+            }
+            
+            Section {
+                Button("Delete shift") {
+                    showingAlert = true
                 }
             }
         }
         .onAppear {
             shiftStart = shiftInfo.startTime
             shiftEnd = shiftInfo.endTime
+            gotPaid = shiftInfo.payPerHour
         }
         .navigationTitle("Edit shift details")
         .toolbar {
-            Button("Save") {
-                onSave = true
-                shiftInfo = ShiftInfo(startTime: shiftStart, endTime: shiftEnd, payPerHour: 22.2)
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Save") {
+                    onSave = true
+                    shiftInfo = ShiftInfo(startTime: shiftStart, endTime: shiftEnd, payPerHour: gotPaid)
+                }
             }
+        }
+        .alert("Delete?", isPresented: $showingAlert) {
+            Button("Cancle", role: .cancel) {}
+            Button("OK", role: .destructive) {
+                isDelete()
+            }
+        } message: {
+            Text("Do you want to delete this shift?")
         }
     }
     

@@ -64,6 +64,7 @@ struct ContentView: View {
     
     @State private var shiftData: [Date: ShiftInfo] = [:]
     @State private var onSave = false
+//    @State private var isDelete = false
     
     var weeklyTotalSalary: Double {
         let totalSalary = shiftData.reduce(into: 0) { total, day in
@@ -156,6 +157,7 @@ struct ContentView: View {
                             HStack {
                                 Text("Shift details for \(formattedDate(selected))")
                                     .font(.headline)
+                                    .foregroundColor(Color(hex: "2D2848"))
                                 
                                 Spacer()
                                 Button("+") {
@@ -168,12 +170,17 @@ struct ContentView: View {
                                 .clipShape(Capsule())
                             }
                             if let shift = shiftData[selected.startOfTheDay] {
-                                Text("Shift start: \(formattedTime(shift.startTime))")
-                                Text("Shift end: \(formattedTime(shift.endTime))")
-                                Text("Total hours: \(String(format: "%g", shift.totalHours))\(shift.totalHours > 5 ? " (includes 0.5hr break)" : "")")
-                                Text("Shift earnings: $\(String(format: "%g", shift.totalSalary))")
+                                Group {
+                                    Text("Shift start: \(formattedTime(shift.startTime))")
+                                    Text("Shift end: \(formattedTime(shift.endTime))")
+                                    Text("Total hours: \(String(format: "%g", shift.totalHours))\(shift.totalHours > 5 ? " (includes 0.5hr break)" : "")")
+                                    Text("Hourly rate: $\(String(format: "%g", shift.payPerHour))")
+                                    Text("Shift earnings: $\(String(format: "%g", shift.totalSalary))")
+                                }
+                                .foregroundColor(Color(hex: "2D2848"))
                             } else {
                                 Text("No shift today, yayy!!")
+                                    .foregroundColor(Color(hex: "2D2848"))
                             }
                         }
                         .padding()
@@ -195,12 +202,17 @@ struct ContentView: View {
                                         }, set: { newValue in
                                             if onSave {
                                                 shiftData[selected.startOfTheDay] = newValue
-                                            } else  {}
+                                            } else {}
                                             onSave = false
                                         }
-                                    )
+                                    ),
+                                    isDelete: {
+                                        shiftData.removeValue(forKey: selected.startOfTheDay)
+                                    }
                                 )
                                 
+                            } else {
+                                EmptyView()
                             }
                             
                         }

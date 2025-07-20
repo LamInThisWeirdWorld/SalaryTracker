@@ -42,6 +42,8 @@ struct ShiftDetailView: View {
         return Calendar.current.date(from: component) ?? .now
     }
     
+    @Environment(\.dismiss) private var dismiss
+    
     let day: Date
     
     @Binding var onSave: Bool
@@ -98,6 +100,7 @@ struct ShiftDetailView: View {
                 Button("Save") {
                     onSave = true
                     shiftInfo = ShiftInfo(startTime: shiftStart, endTime: shiftEnd, payPerHour: gotPaid)
+                    dismiss()
                 }
             }
         }
@@ -105,6 +108,7 @@ struct ShiftDetailView: View {
             Button("Cancle", role: .cancel) {}
             Button("OK", role: .destructive) {
                 isDelete()
+                dismiss()
             }
         } message: {
             Text("Do you want to delete this shift?")

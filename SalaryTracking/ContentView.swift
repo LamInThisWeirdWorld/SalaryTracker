@@ -26,6 +26,7 @@ func getCurrentWeek() -> [WeekDay] {
     calendar.firstWeekday = 2 // Set the first day of the week to monday (sunday = 1)
     
     let today = Date() // Get the current day and time
+    
     // 'guard let': a safe unwrapping. If it fails (return 'nil'), it exist early with 'return []'
     // Calculates the start and end of the current week that includes 'today', based on the calendar
     // Return a dayInterval with start and end
@@ -61,10 +62,10 @@ struct ContentView: View {
     @State private var today = Date()
     @State private var goToEdit: Bool = false
     @State private var thisDay: Date? = nil
+    @State private var hasShift: [Date: Bool] = [:]
     
     @State private var shiftData: [Date: ShiftInfo] = [:]
     @State private var onSave = false
-//    @State private var isDelete = false
     
     var weeklyTotalSalary: Double {
         let totalSalary = shiftData.reduce(into: 0) { total, day in
@@ -112,10 +113,10 @@ struct ContentView: View {
                             .font(.title3.bold())
                             .padding(.horizontal)
                     }
-
                     
                     HStack(spacing: 8) {
                         ForEach(weekDays) { day in
+                            let tDay = day.date
                             VStack {
                                 Text(shortDayString(from: day.date))
                                     .font(.footnote)
@@ -142,7 +143,9 @@ struct ContentView: View {
                             }
                             .padding(.vertical, 10)
                             .frame(maxWidth: .infinity)
-                            .background(selectedDate == day.date ? Color(hex: "F2D88F") : Color(hex: "EBF0FF").opacity(0.7))
+                            .background(selectedDate == day.date ? Color(hex: "F2D88F") :
+                                            (shiftData[tDay.startOfTheDay] != nil ? Color(hex: "B9F0D7") : Color(hex: "EBF0FF").opacity(0.7))
+                                        )
                             .clipShape(Capsule())
                         }
                     }
@@ -202,12 +205,14 @@ struct ContentView: View {
                                         }, set: { newValue in
                                             if onSave {
                                                 shiftData[selected.startOfTheDay] = newValue
+                                                hasShift[selected.startOfTheDay] = true
                                             } else {}
                                             onSave = false
                                         }
                                     ),
                                     isDelete: {
                                         shiftData.removeValue(forKey: selected.startOfTheDay)
+                                        hasShift[selected.startOfTheDay] = false
                                     }
                                 )
                                 

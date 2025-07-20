@@ -21,18 +21,18 @@ struct WeekDay: Identifiable {
 //    }
 }
 
-func getCurrentWeek() -> [WeekDay] {
+func getCurrentWeek(from baseDay: Date) -> [WeekDay] {
     var calendar = Calendar.current // A var that holds the user's current calendar
     calendar.firstWeekday = 2 // Set the first day of the week to monday (sunday = 1)
     
-    let today = Date() // Get the current day and time
+    /*let today = Date()*/ // Get the current day and time
     
     // 'guard let': a safe unwrapping. If it fails (return 'nil'), it exist early with 'return []'
     // Calculates the start and end of the current week that includes 'today', based on the calendar
     // Return a dayInterval with start and end
     // of: tell what time unit you want (.day, .weekOfYear, .month, .year, ect)
     // for: tell which day to look at
-    guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: today) else {
+    guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: baseDay) else {
         return []
     }
     
@@ -54,11 +54,23 @@ extension Date {
     }
 }
 
+extension Calendar {
+    func startOfWeek(for date: Date) -> Date {
+        let components = dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        return self.date(from: components) ?? date
+    }
+    
+}
+
 struct ContentView: View {
     
     @State private var selectedDate: Date? = nil
     @State private var showDetails: Bool = false
-    @State private var weekDays = getCurrentWeek()
+    
+    @State private var currentWeekStart: Date = Calendar.current.startOfWeek(for: Date())
+    @State private var weekDays: [WeekDay] = []
+    
+//    @State private var weekDays = getCurrentWeek()
     @State private var today = Date()
     @State private var goToEdit: Bool = false
     @State private var thisDay: Date? = nil
@@ -114,42 +126,86 @@ struct ContentView: View {
                             .padding(.horizontal)
                     }
                     
-                    HStack(spacing: 8) {
-                        ForEach(weekDays) { day in
-                            let tDay = day.date
-                            VStack {
-                                Text(shortDayString(from: day.date))
-                                    .font(.footnote)
-                                    .foregroundColor(Color(hex: "2D2848"))
-                                
-                                Text(dayNumberString(from: day.date))
+                    ZStack() {
+                        VStack(alignment: .center, spacing: 5) {
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    currentWeekStart = Calendar.current.date(byAdding: .day, value: -7, to: currentWeekStart)!
+                                    weekDays = getCurrentWeek(from: currentWeekStart)
+                                }) {
+                                    Image(systemName: "chevron.left")
+                                        .foregroundColor(Color(hex: "2D2848"))
+                                        .bold()
+                                }
+                                Spacer()
+//                                Text(formattedMonth(currentWeekStart))
+//                                    .foregroundColor(Color(hex: "EDDDEC"))
+//                                    .font(.title2)
+//                                    .bold()
+                                Text(formattedMonthYear(currentWeekStart))
+                                    .foregroundColor(Color(hex: "EDDDEC"))
                                     .font(.title2)
-                                    .fontWeight(day.isToday ? .bold : .regular)
-                                    .frame(width: 40, height: 40)
-                                    .background(Color.clear)
-                                    .clipShape(Circle())
-                                    .foregroundColor(day.isToday ? .red : .primary)
-                                    .onTapGesture {
-                                        withAnimation {
-                                            if selectedDate == day.date {
-                                                selectedDate = nil
-                                                showDetails = false
-                                            } else {
-                                                selectedDate = day.date
-                                                showDetails = true
-                                            }
-                                        }
-                                    }
+                                    .bold()
+                                Spacer()
+                                Button(action: {
+                                    currentWeekStart = Calendar.current.date(byAdding: .day, value: 7, to: currentWeekStart)!
+                                    weekDays = getCurrentWeek(from: currentWeekStart)
+                                }) {
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(Color(hex: "2D2848"))
+                                        .bold()
+                                }
+                                Spacer()
                             }
-                            .padding(.vertical, 10)
-                            .frame(maxWidth: .infinity)
-                            .background(selectedDate == day.date ? Color(hex: "F2D88F") :
-                                            (shiftData[tDay.startOfTheDay] != nil ? Color(hex: "B9F0D7") : Color(hex: "EBF0FF").opacity(0.7))
-                                        )
-                            .clipShape(Capsule())
+//                            .padding(.bottom, 2)
+                            
+//                            Text(formattedYear(today))
+//                                .font(.callout)
+//                                .padding(.top, -5)
+                            
+                            HStack {
+                                ForEach(weekDays) { day in
+                                    let tDay = day.date
+                                    VStack {
+                                        Text(shortDayString(from: day.date))
+                                            .font(.footnote)
+                                            .foregroundColor(Color(hex: "2D2848"))
+                                        
+                                        Text(dayNumberString(from: day.date))
+                                            .font(.title2)
+                                            .fontWeight(day.isToday ? .bold : .regular)
+                                            .frame(width: 40, height: 40)
+                                            .background(Color.clear)
+                                            .clipShape(Circle())
+                                            .foregroundColor(day.isToday ? .red : .primary)
+                                            .onTapGesture {
+                                                withAnimation {
+                                                    if selectedDate == day.date {
+                                                        selectedDate = nil
+                                                        showDetails = false
+                                                    } else {
+                                                        selectedDate = day.date
+                                                        showDetails = true
+                                                    }
+                                                }
+                                            }
+                                    }
+                                    .padding(.vertical, 10)
+                                    .frame(maxWidth: .infinity)
+                                    .background(selectedDate == day.date ? Color(hex: "F2D88F") :
+                                                    (shiftData[tDay.startOfTheDay] != nil ? Color(hex: "B9F0D7") : Color(hex: "EBF0FF").opacity(0.7))
+                                    )
+                                    .clipShape(Capsule())
+                                }
+                            }
                         }
                     }
-                    .padding()
+                    .onAppear {
+                        weekDays = getCurrentWeek(from: currentWeekStart)
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(hex: "A68CEE"))
                     .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -223,6 +279,7 @@ struct ContentView: View {
                         }
                         Spacer()
                     }
+                    
                 }
             }
         }
@@ -258,8 +315,38 @@ struct ContentView: View {
         return formatter.string(from: date)
     }
     
-    func adjustDetail() {
+    func formattedMonth(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM"
+        return formatter.string(from: date)
+    }
+    
+    func formattedMonthYear(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: date)
+    }
+    
+    func formattedYear(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy"
+        return formatter.string(from: date)
+    }
+    
+    func formattedWeekRange(from baseDay: Date) -> String {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: baseDay) else {
+            return ""
+        }
+        let start = weekInterval.start
+        let end = calendar.date(byAdding: .day, value: 6, to: start) ?? start
         
+        let startDay = Calendar.current.component(.day, from: start)
+        let endDay = Calendar.current.component(.day, from: end)
+        let month = Calendar.current.component(.month, from: end)
+        
+        return "\(startDay)-\(endDay)/\(month)"
     }
 
 }

@@ -27,6 +27,15 @@ struct ShiftInfo: Equatable {
     
 }
 
+struct ShiftPreset: Identifiable {
+    let id = UUID()
+    let time: String
+    let startHour: Int
+    let startMinute: Int
+    let endHour: Int
+    let endMinute: Int
+}
+
 struct ShiftDetailView: View {
     static var defaultStartTime: Date {
         var component = DateComponents()
@@ -54,16 +63,23 @@ struct ShiftDetailView: View {
     @State private var showingAlert = false
     @State private var gotPaid: Double = 22.2
     
+    let shiftPresets = [
+        ShiftPreset(time: "3:30 pm - 10:00 pm", startHour: 15, startMinute: 30, endHour: 22, endMinute: 0),
+        ShiftPreset(time: "5:00 pm - 10:00 pm", startHour: 17, startMinute: 0, endHour: 22, endMinute: 0),
+        ShiftPreset(time: "2:30 pm - 11:30 pm", startHour: 14, startMinute: 30, endHour: 23, endMinute: 30),
+        ShiftPreset(time: "3:30 pm - 11:30 pm", startHour: 15, startMinute: 30, endHour: 23, endMinute: 30),
+        ShiftPreset(time: "5:30 pm - 11:30 pm", startHour: 17, startMinute: 30, endHour: 23, endMinute: 30),
+        ShiftPreset(time: "2:30 pm - 10:30 pm", startHour: 14, startMinute: 30, endHour: 22, endMinute: 30),
+        ShiftPreset(time: "5:30 pm - 10:30 pm", startHour: 17, startMinute: 30, endHour: 22, endMinute: 30)
+    ]
+    
     
     let isDelete: () -> Void
     
     var body: some View {
         Form {
-            Section {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Shift for \(formattedDate(day))")
-                        .font(.headline)
-                    HStack {
+            Section("Shift for \(formattedDate(day))") {
+                VStack(alignment: .leading, spacing: 5) {                    HStack {
                         Text("Shift starts at:")
                         Spacer()
                         DatePicker("Please select shift start time", selection: $shiftStart, displayedComponents: .hourAndMinute)
@@ -83,9 +99,32 @@ struct ShiftDetailView: View {
                     .keyboardType(.decimalPad)
             }
             
+            Section("Quick selections") {
+                ForEach(shiftPresets) { preset in
+                    Button(preset.time) {
+                        let calendar = Calendar.current
+                        let today = Date()
+                        var components = calendar.dateComponents([.year, .month, .day], from: today)
+                        
+                        components.hour = preset.startHour
+                        components.minute = preset.startMinute
+                        shiftStart = calendar.date(from: components) ?? today
+                        
+                        components.hour = preset.endHour
+                        components.minute = preset.endMinute
+                        shiftEnd = calendar.date(from: components) ?? today
+                    }
+                }
+            }
+            
+            
             Section {
-                Button("Delete shift") {
-                    showingAlert = true
+                HStack(alignment: .center) {
+                    Spacer()
+                    Button("Delete shift", role: .destructive) {
+                        showingAlert = true
+                    }
+                    Spacer()
                 }
             }
         }

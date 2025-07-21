@@ -80,22 +80,34 @@ struct ContentView: View {
     @State private var onSave = false
     
     var weeklyTotalSalary: Double {
-        let totalSalary = shiftData.reduce(into: 0) { total, day in
-            total += day.value.totalSalary
+        let weekEnd = Calendar.current.date(byAdding: .day, value: 6, to: currentWeekStart)!
+        let totalSalary = shiftData.reduce(into: 0.0) { total, day in
+            let date = day.key
+            if date >= currentWeekStart && date <= weekEnd {
+                total += day.value.totalSalary
+            }
         }
         return totalSalary
     }
     
     var weeklyTotalHours: Double {
+        let weekEnd = Calendar.current.date(byAdding: .day, value: 6, to: currentWeekStart)!
         let totalHours = shiftData.reduce(into: 0) { total, day in
-            total += day.value.totalHours
+            let date = day.key
+            if date >= currentWeekStart && date <= weekEnd {
+                total += day.value.totalHours
+            }
         }
         return totalHours
     }
     
     var weeklyTotalPaidHours: Double {
+        let weekEnd = Calendar.current.date(byAdding: .day, value: 6, to: currentWeekStart)!
         let totalPaidHours = shiftData.reduce(into: 0) { total, day in
-            total += day.value.totalPaidHours
+            let date = day.key
+            if date >= currentWeekStart && date <= weekEnd {
+                total += day.value.totalPaidHours
+            }
         }
         return totalPaidHours
     }
@@ -178,7 +190,7 @@ struct ContentView: View {
                                             .frame(width: 40, height: 40)
                                             .background(Color.clear)
                                             .clipShape(Circle())
-                                            .foregroundColor(day.isToday ? .red : .primary)
+                                            .foregroundColor(day.isToday ? Color(hex: "AA0235") : Color(hex: "2D2848"))
                                             .onTapGesture {
                                                 withAnimation {
                                                     if selectedDate == day.date {
